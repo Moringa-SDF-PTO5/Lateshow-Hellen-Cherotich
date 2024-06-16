@@ -1,27 +1,28 @@
-from flask import jsonify, request
-from app import app, db
-from app.models import Episode, Guest, Appearance
+from flask import Blueprint, jsonify, request
+from . import db
+from .models import Episode, Guest, Appearance
+from .serializers import serialize_episode, serialize_guest, serialize_appearance
 
-@app.route('/episodes')
+routes = Blueprint('routes', __name__)
+
+@routes.route('/episodes', methods=['GET'])
 def get_episodes():
     episodes = Episode.query.all()
-    serialized_episodes = [episode.serialize() for episode in episodes]
-    return jsonify(serialized_episodes)
+    return jsonify([serialize_episode(ep) for ep in episodes])
 
-@app.route('/episodes/<int:id>')
+@routes.route('/episodes/<int:id>', methods=['GET'])
 def get_episode(id):
     episode = Episode.query.get(id)
-    if not episode:
-        return jsonify({'error': 'Episode not found'}), 404
-    return jsonify(episode.serialize())
+    if episode:
+        return jsonify(serialize_episode(episode))
+    return jsonify({'error': 'Episode not found'}), 404
 
-@app.route('/guests')
+@routes.route('/guests', methods=['GET'])
 def get_guests():
     guests = Guest.query.all()
-    serialized_guests = [guest.serialize() for guest in guests]
-    return jsonify(serialized_guests)
+    return jsonify([serialize_guest(guest) for guest in guests])
 
-@app.route('/appearances', methods=['POST'])
+@routes.route('/appearances', methods=['POST'])
 def create_appearance():
     data = request.get_json()
     rating = data.get('rating')
@@ -31,8 +32,17 @@ def create_appearance():
     if not all([rating, episode_id, guest_id]):
         return jsonify({'errors': ['Missing data']}), 400
 
+    episode = Episode.query.get(episode_id)
+    guest = Guest.query.get(guest_id)
+
+    if not episode or not guest:
+        return jsonify({'error': 'Invalid episode or guest ID'}), 404
+
+    if rating < 1 or rating > 5:
+        return jsonify({'errors': ['Rating must be between 1 and 5']}), 400
+
     appearance = Appearance(rating=rating, episode_id=episode_id, guest_id=guest_id)
     db.session.add(appearance)
     db.session.commit()
 
-    return jsonify(appearance.serialize()), 201
+    return jsonify(serialize_appearance(appearance)), 201
