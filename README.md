@@ -32,7 +32,7 @@ bash
 Copy code
 
 
-git clone <repository_url>
+git clone https://github.com/Moringa-SDF-PTO5/Lateshow-Hellen-Cherotich
 
 
 Navigate to the project directory:
@@ -118,7 +118,7 @@ bash
 
 Copy code
 
-python run.py
+python app.py
 
 Usage
 
@@ -127,9 +127,12 @@ Retrieve a list of episodes: Send a GET request to /episodes.
 
 Get details of a specific episode by its ID: Send a GET request to /episodes/<id>, replacing <id> with the episode ID.
 
+curl http://127.0.0.1:5000/api/episodes/1
+
 
 Retrieve a list of guests: Send a GET request to /guests.
 
+curl http://127.0.0.1:5000/api/guests/1
 
 Create a new appearance for a guest on an episode: Send a POST request to /appearances with the following JSON payload:
 
