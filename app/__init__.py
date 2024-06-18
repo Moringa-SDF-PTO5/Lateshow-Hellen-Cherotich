@@ -15,7 +15,9 @@ def create_app():
     migrate.init_app(app, db)
 
     # Import blueprints and register them with the app
-    from .routes import routes_bp
-    app.register_blueprint(routes_bp)
+    from .routes import episodes_bp, guests_bp, appearances_bp
+    app.register_blueprint(episodes_bp)
+    app.register_blueprint(guests_bp)
+    app.register_blueprint(appearances_bp)
 
     return app
